@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Drive Web Test</title>
+  <script src="https://apis.google.com/js/api.js"></script>
+</head>
+<body>
+  <h2>Google Drive OAuth Test</h2>
+  <button id="authorize_button">Sign in with Google</button>
+
+  <script>
+    function handleClientLoad() {
+      gapi.load('client:auth2', initClient);
+    }
+
+    function initClient() {
+      gapi.client.init({
+        clientId: 'YOUR_CLIENT_ID.apps.googleusercontent.com',
+        scope: 'https://www.googleapis.com/auth/drive.readonly'
+      }).then(function () {
+        document.getElementById('authorize_button').onclick = handleAuthClick;
+      });
+    }
+
+    function handleAuthClick() {
+      gapi.auth2.getAuthInstance().signIn().then(listFiles);
+    }
+
+    function listFiles() {
+      gapi.client.load('drive', 'v3', function() {
+        gapi.client.drive.files.list({
+          pageSize: 10,
+          fields: "files(id, name)"
+        }).then(function(response) {
+          console.log(response.result.files);
+          alert(JSON.stringify(response.result.files, null, 2));
+        });
+      });
+    }
+
+    handleClientLoad();
+  </script>
+</body>
+</html>
