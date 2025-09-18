@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SafariVC PKCE Link Generator</title>
+</head>
+<body>
+  <h2>SafariVC PKCE Sign-up Link Generator</h2>
+  <label>Client ID:</label>
+  <input type="text" id="client_id" value="1044800853908-bpkm8s648nfo7v0f9o5iv3rte0bdgqgq.apps.googleusercontent.com" size="60"><br><br>
+  <label>Redirect URI:</label>
+  <input type="text" id="redirect_uri" value="https://helaluddinpolock21-eng.github.io/authCallback.html" size="60"><br><br>
+  <button onclick="generateLink()">Generate Link</button>
+  <pre id="out"></pre>
+
+  <script>
+    function base64urlencode(str) {
+      return btoa(String.fromCharCode.apply(null, new Uint8Array(str)))
+        .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    }
+
+    async function generateLink() {
+      const array = new Uint8Array(32);
+      crypto.getRandomValues(array);
+      const code_verifier = base64urlencode(array);
+
+      const encoder = new TextEncoder();
+      const data = encoder.encode(code_verifier);
+      const digest = await crypto.subtle.digest("SHA-256", data);
+      const code_challenge = base64urlencode(digest);
+
+      const client_id = document.getElementById("client_id").value;
+      const redirect_uri = document.getElementById("redirect_uri").value;
+
+      const link = `https://accounts.google.com/o/oauth2/v2/auth/identifier?flowName=GlifSetupSafariVC&flowEntry=SignUp&client_id=${encodeURIComponent(client_id)}&redirect_uri=${encodeURIComponent(redirect_uri)}&scope=openid%20email%20profile&response_type=code&hl=en&code_challenge=${encodeURIComponent(code_challenge)}&code_challenge_method=S256`;
+
+      document.getElementById("out").innerText =
+        `✅ Generated Link:\n${link}\n\n💡 Keep this code_verifier safe for token exchange:\n${code_verifier}`;
+    }
+  </script>
+</body>
+</html>
